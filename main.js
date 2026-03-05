@@ -8,6 +8,63 @@ const fs = require("fs");
 // ============================================================
 function getShiftDuration(startTime, endTime) {
     // TODO: Implement this function
+    let endArray = endTime.trim().split(":");
+    let startArray = startTime.trim().split(":");
+
+    let endHour = parseInt(endArray[0]);
+    let startHour = parseInt(startArray[0]);
+
+    let endMin = parseInt(endArray[1]);
+    let startMin = parseInt(startArray[1]);
+
+    let endSec = parseInt(endArray[2].split(" ")[0]);
+    let startSec = parseInt(startArray[2].split(" ")[0]);
+
+    let endAmPm = endTime.toLowerCase().includes('pm') ? "pm" : "am";
+    let startAmPm = startTime.toLowerCase().includes('pm') ? "pm" : "am";
+
+    if (startHour === 12) {
+        startHour = 0;
+    }
+
+    if (endHour === 12) {
+        endHour = 0;
+    }
+
+    if(startHour > 12 || endHour > 12 || startMin > 59 || endMin > 59 || startSec > 59 || endSec > 59) {
+        console.log('Invalid Input');
+        return "";
+    }
+
+    
+    if(startAmPm === "pm") {
+        startHour += 12;
+    }
+
+    if(endAmPm === "pm") {
+        endHour += 12;
+    }
+
+    let hourDiff = endHour - startHour;
+    let minDiff = endMin - startMin;
+    let secDiff = endSec - startSec;
+
+    if (secDiff < 0) {
+        secDiff += 60;
+        minDiff--;
+    }
+
+    if (minDiff < 0) {
+        minDiff += 60;
+        hourDiff--;
+    }
+
+    if(hourDiff < 0) {
+        hourDiff += 24;
+    }
+    return hourDiff + ":" +
+           (minDiff < 10 ? "0" + minDiff : minDiff) + ":" +
+           (secDiff < 10 ? "0" + secDiff : secDiff);
 }
 
 // ============================================================
@@ -18,6 +75,57 @@ function getShiftDuration(startTime, endTime) {
 // ============================================================
 function getIdleTime(startTime, endTime) {
     // TODO: Implement this function
+     let notIdleStart = 8;
+    let notIdleEnd = 22;
+
+    let endArray = endTime.trim().split(":");
+    let startArray = startTime.trim().split(":");
+
+    let endHour = parseInt(endArray[0]);
+    let startHour = parseInt(startArray[0]);
+
+    let endMin = parseInt(endArray[1]);
+    let startMin = parseInt(startArray[1]);
+
+    let endSec = parseInt(endArray[2].split(" ")[0]);
+    let startSec = parseInt(startArray[2].split(" ")[0]);
+
+    let endAmPm = endTime.toLowerCase().includes('pm') ? "pm" : "am";
+    let startAmPm = startTime.toLowerCase().includes('pm') ? "pm" : "am";
+
+    if (startHour === 12) startHour = 0;
+    if (endHour === 12) endHour = 0;
+
+    if (startHour > 12 || endHour > 12 || startMin > 59 || endMin > 59 || startSec > 59 || endSec > 59) {
+        console.log('Invalid Input');
+        return "";
+    }
+
+    if (startAmPm === "pm") startHour += 12;
+    if (endAmPm === "pm") endHour += 12;
+
+    let totalIdleSeconds = 0;
+    let startTotalSeconds = (startHour * 3600) + (startMin * 60) + startSec;
+    let endTotalSeconds = (endHour * 3600) + (endMin * 60) + endSec;
+
+    if (endTotalSeconds < startTotalSeconds) {
+        endTotalSeconds += 24 * 3600;
+    }
+
+    for (let i = startTotalSeconds; i < endTotalSeconds; i++) {
+        let currentSecondOfDay = i % (24 * 3600);
+        if (currentSecondOfDay < (notIdleStart * 3600) || currentSecondOfDay >= (notIdleEnd * 3600)) {
+            totalIdleSeconds++;
+        }
+    }
+
+    let hourDiff = Math.floor(totalIdleSeconds / 3600);
+    let minDiff = Math.floor((totalIdleSeconds % 3600) / 60);
+    let secDiff = totalIdleSeconds % 60;
+
+    return hourDiff + ":" +
+           (minDiff < 10 ? "0" + minDiff : minDiff) + ":" +
+           (secDiff < 10 ? "0" + secDiff : secDiff);
 }
 
 // ============================================================
