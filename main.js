@@ -136,6 +136,38 @@ function getIdleTime(startTime, endTime) {
 // ============================================================
 function getActiveTime(shiftDuration, idleTime) {
     // TODO: Implement this function
+    let shiftArray = shiftDuration.trim().split(":");
+    let idleArray = idleTime.trim().split(":");
+    
+    let shiftHour = parseInt(shiftArray[0]);
+    let idleHour = parseInt(idleArray[0]);
+
+    let shiftMin = parseInt(shiftArray[1]);
+    let idleMin = parseInt(idleArray[1]);
+
+    let shiftSec = parseInt(shiftArray[2]);
+    let idleSec = parseInt(idleArray[2]);
+
+    let hourDiff = shiftHour - idleHour;
+    let minDiff = shiftMin - idleMin;
+    let secDiff = shiftSec - idleSec;
+
+    if (secDiff < 0) {
+        secDiff += 60;
+        minDiff--;
+    }
+
+    if (minDiff < 0) {
+        minDiff += 60;
+        hourDiff--;
+    }
+
+    if(hourDiff < 0) {
+        hourDiff += 24;
+    }
+    return hourDiff + ":" +
+           (minDiff < 10 ? "0" + minDiff : minDiff) + ":" +
+           (secDiff < 10 ? "0" + secDiff : secDiff);
 }
 
 // ============================================================
@@ -146,6 +178,25 @@ function getActiveTime(shiftDuration, idleTime) {
 // ============================================================
 function metQuota(date, activeTime) {
     // TODO: Implement this function
+    let activeArray = activeTime.trim().split(":");
+    let activeHour = parseInt(activeArray[0]);
+    let activeMin = parseInt(activeArray[1]);
+    let dateArray = date.trim().split("-");
+    let year = parseInt(dateArray[0]);
+    let month = parseInt(dateArray[1]);
+    let day = parseInt(dateArray[2]);
+    let dailyQuotaHours = 8;
+    let dailyQuotaMin = 24;
+
+    if(year === 2025 && month === 4 && (day >= 10 && day <= 30)) {
+        dailyQuotaHours = 6;
+        dailyQuotaMin = 0;
+    }
+    if(activeHour > dailyQuotaHours || (activeHour === dailyQuotaHours && activeMin >= dailyQuotaMin)) {
+        return true;
+    } else {
+        return false;
+    } 
 }
 
 // ============================================================
