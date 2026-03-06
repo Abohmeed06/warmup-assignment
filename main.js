@@ -327,6 +327,27 @@ function setBonus(textFile, driverID, date, newValue) {
 // ============================================================
 function countBonusPerMonth(textFile, driverID, month) {
     // TODO: Implement this function
+    let fileData = fs.readFileSync(textFile, "utf-8").trim();
+    let lines = [];
+    lines = fileData.split("\n");
+
+    driverID = driverID.trim();
+    if(!fileData.includes(driverID)) {
+        return -1;
+    }
+    let hasBonusCount = 0;
+    if(month.length === 1) {
+        month = "0" + month;
+    }
+    for(let i = 0 ; i < lines.length; i++) {
+        let parts = lines[i].split(",");
+        if(parts[0].trim() === driverID && parts[2].trim().split("-")[1] === month) {
+            if(parts[parts.length - 1].trim() === "true") {
+                hasBonusCount++;
+            }
+        }
+    }
+    return hasBonusCount;
 }
 
 // ============================================================
@@ -338,6 +359,37 @@ function countBonusPerMonth(textFile, driverID, month) {
 // ============================================================
 function getTotalActiveHoursPerMonth(textFile, driverID, month) {
     // TODO: Implement this function
+    let lines = [];
+    driverID = driverID.trim();
+    lines = fs.readFileSync(textFile, "utf-8").trim().split("\n");
+    let totalSeconds = 0;
+    let driverFound = false;
+
+    let monthStr = month < 10 ? "0" + month : month.toString();
+
+    for (let i = 0; i < lines.length; i++) {
+        let parts = lines[i].split(",");
+        if (parts[0].trim() === driverID) {
+            driverFound = true;
+            if (parts[2].trim().split("-")[1] === monthStr) {
+                let activeTime = parts[7].trim().split(":");
+                let activeHour = parseInt(activeTime[0]);
+                let activeMin = parseInt(activeTime[1]);
+                let activeSec = parseInt(activeTime[2]);
+                totalSeconds += (activeHour * 3600) + (activeMin * 60) + activeSec;
+            }
+        }
+    }
+
+    if (!driverFound) return "0:00:00";
+
+    let hourDiff = Math.floor(totalSeconds / 3600);
+    let minDiff = Math.floor((totalSeconds % 3600) / 60);
+    let secDiff = totalSeconds % 60;
+
+    return hourDiff + ":" +
+           (minDiff < 10 ? "0" + minDiff : minDiff) + ":" +
+           (secDiff < 10 ? "0" + secDiff : secDiff);
 }
 
 // ============================================================
