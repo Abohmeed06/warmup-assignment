@@ -207,6 +207,85 @@ function metQuota(date, activeTime) {
 // ============================================================
 function addShiftRecord(textFile, shiftObj) {
     // TODO: Implement this function
+    if (!shiftObj || !shiftObj.driverID || !shiftObj.driverName || !shiftObj.date || !shiftObj.startTime || !shiftObj.endTime) {
+        return {};
+    }
+    let driverID = shiftObj.driverID.trim();
+    let driverName = shiftObj.driverName.trim();
+    let date = shiftObj.date.trim();
+    let startTime = shiftObj.startTime.trim();
+    let endTime = shiftObj.endTime.trim();
+
+    let shiftDuration = getShiftDuration(startTime, endTime);
+    if (shiftDuration === "") return {};
+
+    let idleTime = getIdleTime(startTime, endTime);
+    let activeTime = getActiveTime(shiftDuration, idleTime);
+    let quotaMet = metQuota(date, activeTime);
+
+    let newLine = driverID + "," +
+                  driverName + "," +
+                  date + "," +
+                  startTime + "," +
+                  endTime + "," +
+                  shiftDuration + "," +
+                  idleTime + "," +
+                  activeTime + "," +
+                  quotaMet + "," +
+                  false;
+
+    let fileData = "";
+    let lines = [];
+
+    fileData = fs.readFileSync(textFile, "utf-8").trim();
+    lines = fileData.split("\n");
+        
+
+
+    for (let i = 0; i < lines.length; i++) {
+        let parts = lines[i].split(",");
+        if (parts[0].trim() === driverID &&
+            parts[2].trim() === date) {
+            return {};
+        }
+    }
+
+    let lastIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+        let parts = lines[i].split(",");
+        if (parts[0].trim() === driverID) {
+            lastIndex = i;
+        }
+    }
+
+    if (lastIndex === -1) {
+        lines.push(newLine);
+    } else {
+        let updatedLines = [];
+        for (let i = 0; i < lines.length; i++) {
+            updatedLines.push(lines[i]);
+            if (i === lastIndex) {
+                updatedLines.push(newLine);
+            }
+        }
+        lines = updatedLines;
+    }
+
+    fs.writeFileSync(textFile, lines.join("\n"), "utf-8");
+
+    return {
+        driverID: driverID,
+        driverName: driverName,
+        date: date,
+        startTime: startTime,
+        endTime: endTime,
+        shiftDuration: shiftDuration,
+        idleTime: idleTime,
+        activeTime: activeTime,
+        metQuota: quotaMet,
+        hasBonus: false
+    };
 }
 
 // ============================================================
