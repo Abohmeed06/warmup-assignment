@@ -331,10 +331,15 @@ function countBonusPerMonth(textFile, driverID, month) {
     let lines = [];
     lines = fileData.split("\n");
 
-    driverID = driverID.trim();
-    if(!fileData.includes(driverID)) {
-        return -1;
+    let driverFound = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        let parts = lines[i].split(",");
+        if (parts[0].trim() === driverID) {
+            driverFound = true;
+        }
     }
+    if (!driverFound) return -1;
     let hasBonusCount = 0;
     if(month.length === 1) {
         month = "0" + month;
